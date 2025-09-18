@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->enum('currency', ['RSD', 'EUR', 'USD', 'CHF', 'JPY'])->index();
+            $table->enum('currency', ['RSD', 'EUR', 'USD', 'CHF', 'JPY']);
             $table->bigInteger('balance_minor')->default(0);
             $table->string('name')->nullable();
             $table->timestamps();

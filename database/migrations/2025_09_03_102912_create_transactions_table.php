@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['debit', 'credit', 'transfer'])->index();
+            $table->enum('type', ['debit', 'credit', 'transfer']);
             $table->bigInteger('amount_minor');
-            $table->enum('currency', ['RSD', 'EUR', 'USD', 'CHF', 'JPY'])->index();
-            $table->string('description')->nullable()->index();
+            $table->enum('currency', ['RSD', 'EUR', 'USD', 'CHF', 'JPY']);
+            $table->string('description')->nullable();
             $table->decimal('fx_rate', 18, 8)->nullable();
             $table->enum('fx_base',  ['RSD', 'EUR', 'USD', 'CHF', 'JPY'])->nullable();
             $table->enum('fx_quote', ['RSD', 'EUR', 'USD', 'CHF', 'JPY'])->nullable();
