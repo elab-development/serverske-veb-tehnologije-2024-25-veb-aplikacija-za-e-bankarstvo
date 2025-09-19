@@ -25,8 +25,6 @@ class AccountResource extends JsonResource
             'balance_minor' => (int) $this->balance_minor,
             'balance' => round($this->balance_minor / $factor, $decimals),
             'name'  => $this->name,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at'  => $this->updated_at?->toISOString(),
             'user' => new UserResource($this->whenLoaded('user')),
             'transactions_count' => $this->whenCounted('transactions'),
         ];
