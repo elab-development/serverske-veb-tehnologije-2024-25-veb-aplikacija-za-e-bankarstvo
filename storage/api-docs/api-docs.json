@@ -1,0 +1,1863 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "E-Banking API",
+        "description": "API documentation for the e-banking backend.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/api/accounts": {
+            "get": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "List accounts (admin: all, user: own)",
+                "description": "List accounts (auth required).\n- Admin: all accounts\n- User: only own accounts",
+                "operationId": "13efa5706d1fae14fc1cf87c9f6b1427",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "accounts": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "number": {
+                                                        "type": "string",
+                                                        "example": "RS12 3456 7890 1234 5678"
+                                                    },
+                                                    "currency": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "RSD",
+                                                            "EUR",
+                                                            "USD",
+                                                            "CHF",
+                                                            "JPY"
+                                                        ],
+                                                        "example": "RSD"
+                                                    },
+                                                    "balance_minor": {
+                                                        "type": "integer",
+                                                        "example": 1250000
+                                                    },
+                                                    "balance": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 12500
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Main RSD"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "No accounts found."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Create a new account",
+                "description": "Create a new account (auth required).\n- Admin: must pass user_id (for any user).\n- User: opens account for self (user_id ignored).",
+                "operationId": "e974666bc6c050296a8ee09a3ab6533f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "currency"
+                                ],
+                                "properties": {
+                                    "currency": {
+                                        "type": "string",
+                                        "enum": [
+                                            "RSD",
+                                            "EUR",
+                                            "USD",
+                                            "CHF",
+                                            "JPY"
+                                        ],
+                                        "example": "EUR"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "EUR Savings"
+                                    },
+                                    "user_id": {
+                                        "description": "Required if caller is admin; ignored for regular users",
+                                        "type": "integer",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Account created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Account created successfully"
+                                        },
+                                        "account": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 21
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "number": {
+                                                    "type": "string",
+                                                    "example": "EU48 6986 5935 1665 6363"
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "EUR"
+                                                },
+                                                "balance_minor": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                },
+                                                "balance": {
+                                                    "type": "number",
+                                                    "example": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "EUR Savings"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/accounts/{account}": {
+            "get": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Get a single account (admin or owner)",
+                "description": "Get a single account (auth required).\n- Allowed if admin or owner of the account.",
+                "operationId": "5506aaeb1f702435acdd17f078f86a1c",
+                "parameters": [
+                    {
+                        "name": "account",
+                        "in": "path",
+                        "description": "Account ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "account": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "number": {
+                                                    "type": "string",
+                                                    "example": "RS12 3456 7890 1234 5678"
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "RSD"
+                                                },
+                                                "balance_minor": {
+                                                    "type": "integer",
+                                                    "example": 1250000
+                                                },
+                                                "balance": {
+                                                    "type": "number",
+                                                    "example": 12500
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Main RSD"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Update an account name (admin or owner)",
+                "description": "Update an account (auth required).\n- Admin or owner can rename the account (name only).",
+                "operationId": "a64480cfcba45a2942d8f3fb29fb1a24",
+                "parameters": [
+                    {
+                        "name": "account",
+                        "in": "path",
+                        "description": "Account ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Everyday RSD"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Account updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Account updated successfully"
+                                        },
+                                        "account": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Everyday RSD"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Accounts"
+                ],
+                "summary": "Close an account (admin or owner, balance must be 0)",
+                "description": "Delete (close) an account (auth required).\n- Admin or owner\n- Only allowed if balance is zero",
+                "operationId": "a30295a60453fd97c43c5ffd510e9858",
+                "parameters": [
+                    {
+                        "name": "account",
+                        "in": "path",
+                        "description": "Account ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account closed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Account closed successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Balance not zero",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Account cannot be closed while balance is not zero."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "description": "Register a new user.",
+                "operationId": "8a56853624e025573120a09a4c75d468",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Ana Kalinić"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ana@gmail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User registered",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Ana Kalinić"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "ana@gmail.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|uB7...token..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "email": [
+                                                    "The email has already been taken."
+                                                ],
+                                                "password": [
+                                                    "The password field must be at least 8 characters."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login and obtain a bearer token",
+                "description": "Login and get an access token.",
+                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ana@gmail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ana Kalinić logged in"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|uB7...token..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "WRONG INPUT"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout current user (revoke all tokens)",
+                "description": "Logout (revoke all tokens of the current user).",
+                "operationId": "fe8f3429cd6979b3b4517e186505f9f9",
+                "responses": {
+                    "200": {
+                        "description": "Logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You have successfully logged out."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "List all categories",
+                "description": "List all categories (public).",
+                "operationId": "3f5817a34833d0a1f4af4548dd3aeaba",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "categories": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Groceries"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Supermarket and food essentials"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No categories found."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Create a new category (admin only)",
+                "description": "Create a new category (admin only).",
+                "operationId": "71fcad552bb0eaba9fb191fd8d8dcab0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Utilities"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Electricity, water, internet"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category created successfully"
+                                        },
+                                        "category": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Utilities"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Electricity, water, internet"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Only admins can create categories"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "name": [
+                                                    "The name has already been taken."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get a single category",
+                "description": "Get a single category by id (public).",
+                "operationId": "e92579e78391b6199e78c2a091dbea0a",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "category": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Restaurants"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Dining and coffee shops"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Update a category (admin only)",
+                "description": "Update a category (admin only).",
+                "operationId": "02aa39951e67916277e28086f85909c8",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Dining"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "maxLength": 1000,
+                                        "example": "Eating out and cafés"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category updated successfully"
+                                        },
+                                        "category": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Dining"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Eating out and cafés"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Only admins can update categories"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "name": [
+                                                    "The name has already been taken."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Delete a category (admin only)",
+                "description": "Delete a category (admin only).",
+                "operationId": "d9ecd5c4a74c4d75339251863eedc08c",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category deleted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Only admins can delete categories"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/rates/today": {
+            "get": {
+                "tags": [
+                    "Rates"
+                ],
+                "summary": "Get today's exchange rates vs RSD (EUR, USD, CHF, JPY)",
+                "description": "Get today's middle exchange rates vs RSD (no API key).\nSource: https://kurs.resenje.org/api/v1/rates/today",
+                "operationId": "e82f4b9c84f4db25a46b356bb06543a7",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "base": {
+                                            "type": "string",
+                                            "example": "RSD"
+                                        },
+                                        "date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-04"
+                                        },
+                                        "rates": {
+                                            "properties": {
+                                                "EUR": {
+                                                    "type": "number",
+                                                    "example": 117.1796
+                                                },
+                                                "USD": {
+                                                    "type": "number",
+                                                    "example": 108.32
+                                                },
+                                                "CHF": {
+                                                    "type": "number",
+                                                    "example": 120.45
+                                                },
+                                                "JPY": {
+                                                    "type": "number",
+                                                    "example": 0.725
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Failed to fetch rates",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Failed to fetch rates"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transactions": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "List transactions (with filters, sorting, pagination)",
+                "description": "List transactions (admin: all; user: only own/counterparty).\nSupports filters, search, sorting, and pagination.",
+                "operationId": "6581469356772e7a74a0d79897544f1a",
+                "parameters": [
+                    {
+                        "name": "account_id",
+                        "in": "query",
+                        "description": "Filter by account id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Filter by category id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type[]",
+                        "in": "query",
+                        "description": "Filter by type(s)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "debit",
+                                    "credit",
+                                    "transfer"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "currency[]",
+                        "in": "query",
+                        "description": "Filter by currency code(s)",
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "RSD",
+                                    "EUR",
+                                    "USD",
+                                    "CHF",
+                                    "JPY"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "YYYY-MM-DD (inclusive)",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "YYYY-MM-DD (inclusive)",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "min_amount",
+                        "in": "query",
+                        "description": "Minimum amount (major units)",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "max_amount",
+                        "in": "query",
+                        "description": "Maximum amount (major units)",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search in description",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Sort field",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "executed_at",
+                                "amount_minor",
+                                "id"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "description": "Sort direction",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page (1-100)",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "transactions": {
+                                            "description": "Laravel paginator payload",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 101
+                                                            },
+                                                            "account_id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "transfer"
+                                                            },
+                                                            "amount_minor": {
+                                                                "type": "integer",
+                                                                "example": -250000
+                                                            },
+                                                            "currency": {
+                                                                "type": "string",
+                                                                "example": "RSD"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Rent"
+                                                            },
+                                                            "category_id": {
+                                                                "type": "integer",
+                                                                "example": 3,
+                                                                "nullable": true
+                                                            },
+                                                            "counterparty_account_id": {
+                                                                "type": "integer",
+                                                                "example": 18
+                                                            },
+                                                            "fx_rate": {
+                                                                "type": "number",
+                                                                "example": 117.18,
+                                                                "nullable": true
+                                                            },
+                                                            "fx_base": {
+                                                                "type": "string",
+                                                                "example": "EUR",
+                                                                "nullable": true
+                                                            },
+                                                            "fx_quote": {
+                                                                "type": "string",
+                                                                "example": "RSD",
+                                                                "nullable": true
+                                                            },
+                                                            "executed_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2025-09-04T10:00:00Z"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "links": {
+                                                    "type": "object"
+                                                },
+                                                "meta": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create a transaction (transfer/credit/debit)",
+                "description": "Create a transaction.\n- Users: transfers from their own account.\n- Admins: transfers + manual credits/debits.\n- Cross-currency transfers use ExchangeRateService for FX.",
+                "operationId": "ab765dced58cfe2f620929db31452145",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "account_id",
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "debit",
+                                            "credit",
+                                            "transfer"
+                                        ],
+                                        "example": "transfer"
+                                    },
+                                    "account_id": {
+                                        "description": "Source account id",
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "counterparty_account_id": {
+                                        "description": "Required for transfers",
+                                        "type": "integer",
+                                        "example": 9,
+                                        "nullable": true
+                                    },
+                                    "amount": {
+                                        "description": "Major units",
+                                        "type": "number",
+                                        "example": 2500
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Rent"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 3,
+                                        "nullable": true
+                                    },
+                                    "executed_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-09-04T09:30:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "required": [
+                                                "message",
+                                                "out",
+                                                "in"
+                                            ],
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Transfer completed"
+                                                },
+                                                "out": {
+                                                    "$ref": "#/components/schemas/TransactionItem"
+                                                },
+                                                "in": {
+                                                    "$ref": "#/components/schemas/TransactionItem"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "required": [
+                                                "message",
+                                                "rate",
+                                                "out",
+                                                "in"
+                                            ],
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "FX transfer completed"
+                                                },
+                                                "rate": {
+                                                    "type": "number",
+                                                    "example": 117.1796
+                                                },
+                                                "out": {
+                                                    "$ref": "#/components/schemas/TransactionItem"
+                                                },
+                                                "in": {
+                                                    "$ref": "#/components/schemas/TransactionItem"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "required": [
+                                                "message",
+                                                "transaction"
+                                            ],
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Transaction created"
+                                                },
+                                                "transaction": {
+                                                    "$ref": "#/components/schemas/TransactionItem"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "409": {
+                        "description": "Insufficient funds"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "424": {
+                        "description": "Failed to fetch FX rate"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/{transaction}": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get a single transaction",
+                "description": "Get a single transaction (admin or owner of either side).",
+                "operationId": "05e2714a413c88baa08631aea0c3bb87",
+                "parameters": [
+                    {
+                        "name": "transaction",
+                        "in": "path",
+                        "description": "Transaction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "transaction": {
+                                            "$ref": "#/components/schemas/TransactionItem"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}/accounts": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List accounts for a given user (admin only)",
+                "description": "Get all accounts for a specific user (admin only).",
+                "operationId": "902cc6f79c96775a2a0488c0891e2f4d",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "accounts": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 7
+                                                    },
+                                                    "number": {
+                                                        "type": "string",
+                                                        "example": "RS12 3456 7890 1234 5678"
+                                                    },
+                                                    "currency": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "RSD",
+                                                            "EUR",
+                                                            "USD",
+                                                            "CHF",
+                                                            "JPY"
+                                                        ],
+                                                        "example": "RSD"
+                                                    },
+                                                    "balance_minor": {
+                                                        "type": "integer",
+                                                        "example": 1250000
+                                                    },
+                                                    "balance": {
+                                                        "type": "number",
+                                                        "example": 12500
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Main RSD"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Only admins can access this endpoint"
+                    },
+                    "404": {
+                        "description": "No accounts found for this user."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}/transactions": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List transactions for a given user (admin only)",
+                "description": "Get all transactions involving a specific user (admin only).\nIncludes transactions where the user's accounts are either primary or counterparty.",
+                "operationId": "713e53673349343f3b3cecd39994f3fe",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "transactions": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 101
+                                                    },
+                                                    "account_id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "debit",
+                                                            "credit",
+                                                            "transfer"
+                                                        ],
+                                                        "example": "transfer"
+                                                    },
+                                                    "amount_minor": {
+                                                        "type": "integer",
+                                                        "example": -250000
+                                                    },
+                                                    "currency": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "RSD",
+                                                            "EUR",
+                                                            "USD",
+                                                            "CHF",
+                                                            "JPY"
+                                                        ],
+                                                        "example": "RSD"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Rent"
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 3,
+                                                        "nullable": true
+                                                    },
+                                                    "counterparty_account_id": {
+                                                        "type": "integer",
+                                                        "example": 18
+                                                    },
+                                                    "fx_rate": {
+                                                        "type": "number",
+                                                        "example": 117.1796,
+                                                        "nullable": true
+                                                    },
+                                                    "fx_base": {
+                                                        "type": "string",
+                                                        "example": "EUR",
+                                                        "nullable": true
+                                                    },
+                                                    "fx_quote": {
+                                                        "type": "string",
+                                                        "example": "RSD",
+                                                        "nullable": true
+                                                    },
+                                                    "executed_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-04T10:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Only admins can access this endpoint"
+                    },
+                    "404": {
+                        "description": "No transactions found for this user."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TransactionItem": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "account_id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "transfer"
+                    },
+                    "amount_minor": {
+                        "type": "integer",
+                        "example": -250000
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "RSD"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Rent"
+                    },
+                    "category_id": {
+                        "type": "integer",
+                        "example": 3,
+                        "nullable": true
+                    },
+                    "counterparty_account_id": {
+                        "type": "integer",
+                        "example": 9
+                    },
+                    "fx_rate": {
+                        "type": "number",
+                        "example": 117.1796,
+                        "nullable": true
+                    },
+                    "fx_base": {
+                        "type": "string",
+                        "example": "EUR",
+                        "nullable": true
+                    },
+                    "fx_quote": {
+                        "type": "string",
+                        "example": "RSD",
+                        "nullable": true
+                    },
+                    "executed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-09-04T09:30:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Accounts",
+            "description": "Accounts"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
+        {
+            "name": "Rates",
+            "description": "Rates"
+        },
+        {
+            "name": "Transactions",
+            "description": "Transactions"
+        },
+        {
+            "name": "Users",
+            "description": "Users"
+        }
+    ]
+}
