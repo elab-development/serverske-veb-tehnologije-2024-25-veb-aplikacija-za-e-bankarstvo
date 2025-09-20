@@ -1,66 +1,109 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# E-Banking API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A lightweight, production-oriented REST backend for personal e-banking. Users can manage multi-currency accounts, view and search transactions, and transfer funds (including FX). Admins get elevated endpoints for oversight. The API ships with OpenAPI (Swagger) docs and consistent JSON resources.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Auth & RBAC: Laravel Sanctum bearer tokens; roles: admin / user
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Accounts: RSD (default) + EUR, USD, CHF, JPY; balances stored in minor units (no float issues)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Transactions: transfer, credit, debit; same-currency and cross-currency (with recorded FX rate)
 
-## Learning Laravel
+FX Rates:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Real-time pair rates via Exchangerate-API v6 (supports RSD)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Public “today” RSD rates via NBS Kurs (no API key)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Categories: tag transactions and search by category/name
 
-## Laravel Sponsors
+Filtering & Search: by type, currency, date range, amount range, description; sorting + pagination
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Admin endpoints: fetch a user’s accounts & all related transactions
 
-### Premium Partners
+Swagger UI: interactive docs at /api/documentation
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Tech stack
 
-## Contributing
+Laravel, PHP, MySQL
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Sanctum for tokens
 
-## Code of Conduct
+L5-Swagger for OpenAPI docs
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+HTTP Client for external FX APIs
 
-## Security Vulnerabilities
+## Getting started
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Prerequisites
 
-## License
+PHP 8.2+ with extensions: pdo_mysql, mbstring, openssl, curl, json, xml
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Composer
+
+MySQL/MariaDB
+
+Node (optional, only if you plan to serve a UI)
+
+2. Clone & install
+   git clone <your-repo-url>
+   cd e-banking
+   composer install
+   cp .env.example .env
+   php artisan key:generate
+
+3. Configure environment
+
+Edit .env:
+
+APP_NAME="E-Banking API"
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=e_banking
+DB_USERNAME=root
+DB_PASSWORD=secret
+
+Sanctum
+
+SESSION_DRIVER=cookie
+SANCTUM_STATEFUL_DOMAINS=localhost
+
+Exchangerate-API v6 (pair endpoint)
+
+EXR_V6_KEY=your_exchangerateapi_key_here
+
+You can run without EXR_V6_KEY for same-currency transfers; FX transfers require a valid key.
+
+4. Database: migrate & seed
+   php artisan migrate
+   php artisan db:seed
+
+Seeds will create:
+
+one admin user and a few users
+
+1–2 accounts per user
+
+common categories (e.g., Groceries, Utilities, Restaurants…)
+
+several transactions (including FX examples)
+
+5. Swagger (OpenAPI) setup
+
+Install once (already done if committed):
+
+composer require darkaonline/l5-swagger
+php artisan vendor:publish --provider="L5Swagger\L5SwaggerServiceProvider"
+
+Generate docs (do this whenever you change annotations):
+
+php artisan l5-swagger:generate
+
+Open: http://localhost:8000/api/documentation
+
+6. Run the server
+   php artisan serve
