@@ -3,7 +3,9 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\NbsRatesController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
+Route::get('/rates/today', [NbsRatesController::class, 'today']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -38,4 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::resource('transactions', TransactionController::class)
         ->only(['store', 'index', 'show']);
+
+    Route::get('/users/{user}/accounts', [UserController::class, 'accounts']);
+    Route::get('/users/{user}/transactions', [UserController::class, 'transactions']);
 });
